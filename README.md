@@ -169,26 +169,34 @@ class ParticleSystem {
 | **Fly.io** | ~$0-5/mo | <1s | Production |
 | **Railway** | Free tier | Similar to Render | Quick deploys |
 
-### Recommended: Render + UptimeRobot
+### Quick Deploy to Render
 
-1. Deploy to Render free tier
-2. Use [UptimeRobot](https://uptimerobot.com/) (free) to ping every 14 mins
-3. Server never sleeps during usage hours
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 
-### Dockerfile
+1. **Fork this repo** on GitHub
+2. **Create new Web Service** on [Render](https://render.com)
+3. **Connect your GitHub repo**
+4. **Set environment variables:**
+   - `GROQ_API_KEY` - Your Groq API key
+   - `GEMINI_API_KEY` - Your Gemini API key
+5. **Deploy!**
 
-```dockerfile
-FROM golang:1.21-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN go build -o server ./cmd/server
+### Keep-Alive with UptimeRobot
 
-FROM alpine:latest
-COPY --from=builder /app/server .
-COPY --from=builder /app/web ./web
-COPY --from=builder /app/config.yaml .
-EXPOSE 8080
-CMD ["./server"]
+1. Sign up at [UptimeRobot](https://uptimerobot.com/) (free)
+2. Create HTTP(s) monitor
+3. URL: `https://your-app.onrender.com/health`
+4. Interval: 14 minutes
+5. Server stays awake during monitored hours!
+
+### Local Docker Build
+
+```bash
+docker build -t npc-arena .
+docker run -p 8080:8080 \
+  -e GROQ_API_KEY=your_key \
+  -e GEMINI_API_KEY=your_key \
+  npc-arena
 ```
 
 ---

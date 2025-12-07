@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+web-react/node_modules/
+
+# Build outputs
+*.exe
+*.dll
+*.so
+*.dylib
+main
+
+# Test files
+*_test.go
+*.test
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Development files
+.env
+.env.local
+README.md
+docs/
+
+# macOS
+.DS_Store
