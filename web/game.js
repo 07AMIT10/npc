@@ -657,7 +657,8 @@ function handleAIResponse(data) {
 // ============ WEBSOCKET ============
 function connectWebSocket() {
     try {
-        gameState.ws = new WebSocket('ws://localhost:8080/ws');
+        const wsPort = window.location.port || '8080';
+        gameState.ws = new WebSocket(`ws://${window.location.hostname || 'localhost'}:${wsPort}/ws`);
 
         gameState.ws.onopen = () => {
             document.getElementById('connection-status').textContent = '● Online';
@@ -975,11 +976,8 @@ function handleNpcChallenge(npc, gateId, gate) {
 
         // Add points to team
         const team = npc.team;
-        if (gameState.teams) {
-            const teamData = gameState.teams.find(t => t.name.toLowerCase() === team);
-            if (teamData) {
-                teamData.score = (teamData.score || 0) + 50;
-            }
+        if (gameState.teams && gameState.teams[team]) {
+            gameState.teams[team].score = (gameState.teams[team].score || 0) + 50;
         }
 
         // Show success notification
@@ -1073,8 +1071,8 @@ function updateTeamScores() {
     if (!teamList || !gameState.teams) return;
 
     // Update score displays in header
-    const redScore = gameState.teams.find(t => t.name.toLowerCase() === 'red')?.score || 0;
-    const blueScore = gameState.teams.find(t => t.name.toLowerCase() === 'blue')?.score || 0;
+    const redScore = gameState.teams.red?.score || 0;
+    const blueScore = gameState.teams.blue?.score || 0;
 
     const redScoreEl = document.getElementById('red-score');
     const blueScoreEl = document.getElementById('blue-score');

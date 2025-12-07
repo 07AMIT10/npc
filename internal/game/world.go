@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+
 	"github.com/amit/npc/internal/challenge"
 	"github.com/amit/npc/internal/config"
 )
@@ -89,7 +91,7 @@ func NewWorld(cfg *config.Config) *World {
 
 			pos := positions[i%len(positions)]
 			npc := &NPC{
-				ID:          "npc_" + string(rune('0'+npcIndex)),
+				ID:          fmt.Sprintf("npc_%d", npcIndex),
 				Name:        npcName,
 				Pos:         pos,
 				HP:          100,
