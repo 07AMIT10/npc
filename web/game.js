@@ -476,15 +476,16 @@ function gameLoop() {
     gameState.chatBubbles.forEach(b => b.update());
     gameState.chatBubbles = gameState.chatBubbles.filter(b => !b.isExpired());
 
-    // Request AI decisions periodically
+    // Request AI decisions periodically - BATCH MODE for cost optimization!
+    // Instead of 4 individual calls, we send 1 batch request
     const now = Date.now();
-    gameState.npcs.forEach(npc => {
-        const lastDecision = gameState.lastDecisionTime[npc.id] || 0;
-        if (now - lastDecision > 1000 / CONFIG.DECISION_RATE) {
-            requestDecision(npc);
-            gameState.lastDecisionTime[npc.id] = now;
-        }
-    });
+    const batchInterval = 4000; // Request batch every 4 seconds
+
+    if (!gameState.lastBatchTime) gameState.lastBatchTime = 0;
+    if (now - gameState.lastBatchTime > batchInterval) {
+        requestBatchDecisions();
+        gameState.lastBatchTime = now;
+    }
 
     // Request commentary every 10 seconds
     if (!gameState.lastCommentaryTime) gameState.lastCommentaryTime = now;
@@ -519,6 +520,28 @@ function requestDecision(npc) {
     } else {
         simulateAIDecision(npc);
     }
+}
+
+// COST OPTIMIZATION: Request decisions for ALL NPCs in a single call!
+// This reduces API costs by ~75% (4 calls → 1 call)
+function requestBatchDecisions() {
+    if (!gameState.ws || gameState.ws.readyState !== WebSocket.OPEN) {
+        // Demo mode: simulate decisions for all NPCs
+        gameState.npcs.forEach(npc => simulateAIDecision(npc));
+        return;
+    }
+
+    // Collect observations from all NPCs
+    const observations = gameState.npcs.map(npc =>
+        npc.getObservation(gameState.npcs, gameState.gates)
+    );
+
+    gameState.ws.send(JSON.stringify({
+        type: 'batch_decisions',
+        observations: observations
+    }));
+
+    console.log(`📦 Batch request sent for ${observations.length} NPCs`);
 }
 
 function simulateAIDecision(npc) {
@@ -687,6 +710,20 @@ function connectWebSocket() {
 
                 case 'decision':
                     handleAIResponse(data);
+                    break;
+
+                case 'batch_decisions':
+                    // COST OPTIMIZATION: Handle all NPC decisions from single LLM call
+                    if (data.decisions && Array.isArray(data.decisions)) {
+                        const cacheHits = data.from_cache ? data.from_cache.filter(Boolean).length : 0;
+                        console.log(`📦 Batch response: ${data.decisions.length} decisions (${cacheHits} from cache)`);
+
+                        data.decisions.forEach((decision, index) => {
+                            if (decision) {
+                                handleAIResponse(decision);
+                            }
+                        });
+                    }
                     break;
 
                 case 'brain_strategy':

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -52,6 +53,10 @@ func main() {
 	apiManager := api.NewManager(cfg)
 	log.Printf("🤖 API Manager ready - SLM: %s, Brain: %s",
 		apiManager.GetActiveSLM(), apiManager.GetActiveBrain())
+
+	// Initialize batch decision system (cost optimization)
+	batchSystem := api.NewBatchDecisionSystem(apiManager)
+	log.Println("💰 Batch decision system ready (cost optimization enabled)")
 
 	// Initialize zone generator (Phase 3)
 	zoneGen := game.NewZoneGenerator()
@@ -119,6 +124,41 @@ func main() {
 				// Send decision back
 				decision["type"] = "decision"
 				c.WriteJSON(decision)
+
+			case "batch_decisions":
+				// COST OPTIMIZATION: Get decisions for ALL NPCs in a single LLM call!
+				// This reduces API calls by ~75% (4 calls → 1 call)
+				observationsRaw, ok := msg["observations"].([]interface{})
+				if !ok {
+					log.Println("⚠️ batch_decisions: invalid observations format")
+					break
+				}
+
+				observations := make([]map[string]interface{}, 0, len(observationsRaw))
+				for _, obsRaw := range observationsRaw {
+					if obs, ok := obsRaw.(map[string]interface{}); ok {
+						observations = append(observations, obs)
+					}
+				}
+
+				if len(observations) == 0 {
+					break
+				}
+
+				// Use batch system with context for cancellation support
+				ctx := context.Background()
+				result := batchSystem.GetBatchDecisions(ctx, observations)
+
+				if result.Error != nil {
+					log.Printf("⚠️ Batch decision error: %v", result.Error)
+				}
+
+				// Send all decisions back
+				c.WriteJSON(fiber.Map{
+					"type":       "batch_decisions",
+					"decisions":  result.Decisions,
+					"from_cache": result.FromCache,
+				})
 
 			case "brain_request":
 				summary := msg["summary"].(string)
@@ -315,6 +355,7 @@ func main() {
 		return c.JSON(fiber.Map{
 			"llm_stats":     observer.GetStats(),
 			"game_stats":    world.GetTeamScores(),
+			"batch_stats":   batchSystem.GetStats(), // Cost optimization metrics
 			"recent_traces": observer.GetRecentTraces(10),
 			"recent_events": observer.GetRecentAudits(20),
 		})
