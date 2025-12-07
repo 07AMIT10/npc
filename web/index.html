@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC Arena v2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1>🎮 NPC Arena</h1>
+                <span class="version-badge">v2</span>
+            </div>
+            <div class="header-center">
+                <div class="team-scores">
+                    <div class="team-score team-red">
+                        <span class="team-dot"></span>
+                        <span class="team-name">RED</span>
+                        <span id="score-red" class="score-value">0</span>
+                    </div>
+                    <div class="score-divider">vs</div>
+                    <div class="team-score team-blue">
+                        <span id="score-blue" class="score-value">0</span>
+                        <span class="team-name">BLUE</span>
+                        <span class="team-dot"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <span id="connection-status" class="status-badge disconnected">● Offline</span>
+                <span id="tick-counter" class="tick-badge">Tick: 0</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Game Canvas -->
+            <div class="game-panel">
+                <canvas id="game-canvas"></canvas>
+
+                <!-- Tension Meter -->
+                <div class="tension-meter">
+                    <span class="tension-label">Tension</span>
+                    <div class="tension-bar">
+                        <div id="tension-fill" class="tension-fill" style="width: 30%"></div>
+                    </div>
+                </div>
+
+                <!-- Challenge Modal (improved UX) -->
+                <div id="challenge-modal" class="challenge-modal hidden">
+                    <div class="challenge-content">
+                        <button id="challenge-close" class="challenge-close">✕</button>
+
+                        <h2 id="challenge-title">🧩 Challenge</h2>
+                        <p id="challenge-description" class="challenge-desc"></p>
+
+                        <!-- Participants -->
+                        <div id="challenge-participants" class="challenge-participants"></div>
+
+                        <!-- AI Thinking Section -->
+                        <div id="challenge-thinking" class="challenge-thinking">
+                            <div class="thinking-header">
+                                <span class="thinking-icon">🧠</span>
+                                <span>AI is reasoning...</span>
+                            </div>
+                            <div id="thinking-content" class="thinking-content">
+                                <div class="thinking-dots"><span></span><span></span><span></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Answer Section -->
+                        <div id="challenge-answer" class="challenge-answer hidden">
+                            <div class="answer-header">💡 Answer</div>
+                            <div id="answer-content" class="answer-content"></div>
+                        </div>
+
+                        <!-- Result Section -->
+                        <div id="challenge-result" class="challenge-result hidden">
+                            <div id="result-icon" class="result-icon"></div>
+                            <div id="result-text" class="result-text"></div>
+                            <div id="result-feedback" class="result-feedback"></div>
+                        </div>
+
+                        <div id="challenge-status" class="challenge-status"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Panel -->
+            <aside class="side-panel">
+                <!-- Teams Section -->
+                <div class="panel-section teams-section">
+                    <h3>🏆 Teams</h3>
+                    <div id="team-list"></div>
+                </div>
+
+                <!-- Live Feed -->
+                <div class="panel-section feed-section">
+                    <h3>💬 Live Feed</h3>
+                    <div id="live-feed"></div>
+                </div>
+
+                <!-- Brain Strategy -->
+                <div class="panel-section strategy-section">
+                    <h3>🧠 AI Commentary</h3>
+                    <div id="commentary"></div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Footer Controls -->
+        <footer class="app-footer">
+            <div class="controls">
+                <button id="btn-start" class="btn btn-primary">▶ Start</button>
+                <button id="btn-pause" class="btn btn-secondary">⏸ Pause</button>
+                <button id="btn-reset" class="btn btn-secondary">🔄 Reset</button>
+            </div>
+            <div class="provider-info">
+                <span>SLM: <strong id="slm-provider">--</strong></span>
+                <span class="divider">|</span>
+                <span>Brain: <strong id="brain-provider">--</strong></span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

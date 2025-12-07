@@ -1,0 +1,15 @@
+# Ignore environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# Binary
+npc-server
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS files
+.DS_Store

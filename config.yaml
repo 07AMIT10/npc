@@ -1,0 +1,90 @@
+# Smart NPC Arena v2 Configuration
+
+game:
+  tick_rate: 60
+  decision_rate: 2
+  world_width: 1200
+  world_height: 800
+  starting_tokens: 50
+  hint_cost: 5
+  skip_cost: 20
+
+npcs:
+  count: 4
+  names: ["Explorer", "Scout", "Wanderer", "Seeker"]
+
+teams:
+  red:
+    name: "Team Red"
+    color: "#ef4444"
+    members: ["Explorer", "Scout"]
+  blue:
+    name: "Team Blue"
+    color: "#3b82f6"
+    members: ["Wanderer", "Seeker"]
+
+# Model roles - each role can use different provider/model
+model_roles:
+  movement:
+    provider: "${MOVEMENT_PROVIDER:-groq}"
+    model: "${MOVEMENT_MODEL:-llama-3.1-8b-instant}"
+    max_tokens: 50
+    temperature: 0.3
+  challenge:
+    provider: "${CHALLENGE_PROVIDER:-groq}"
+    model: "${CHALLENGE_MODEL:-llama-3.1-8b-instant}"
+    max_tokens: 200
+    temperature: 0.7
+  judge:
+    provider: "${JUDGE_PROVIDER:-gemini}"
+    model: "${JUDGE_MODEL:-gemini-2.0-flash}"
+    max_tokens: 100
+    temperature: 0.1
+  zone_generator:
+    provider: "${ZONE_GEN_PROVIDER:-gemini}"
+    model: "${ZONE_GEN_MODEL:-gemini-2.0-flash}"
+    max_tokens: 500
+    temperature: 0.9
+  commentary:
+    provider: "${COMMENTARY_PROVIDER:-groq}"
+    model: "${COMMENTARY_MODEL:-llama-3.1-8b-instant}"
+    max_tokens: 30
+    temperature: 0.8
+
+# SLM Providers (fast action decisions) - in priority order
+slm_providers:
+  - name: groq
+    enabled: true
+    api_key: "${GROQ_API_KEY}"
+    base_url: "https://api.groq.com/openai/v1"
+    model: "llama-3.1-8b-instant"
+    
+  - name: sambanova
+    enabled: false  # Disabled due to aggressive rate limiting
+    api_key: "${SAMBANOVA_API_KEY}"
+    base_url: "https://api.sambanova.ai/v1"
+    model: "Meta-Llama-3.1-8B-Instruct"
+    
+  - name: huggingface
+    enabled: true
+    api_key: "${HF_API_KEY}"
+    base_url: "https://router.huggingface.co/v1"
+    model: "meta-llama/Llama-3.2-3B-Instruct"
+
+# Brain LLM (strategic thinking) - in priority order
+brain_providers:
+  - name: gemini
+    enabled: true
+    api_key: "${GEMINI_API_KEY}"
+    model: "gemini-2.0-flash"
+
+# Observability
+observability:
+  trace_enabled: true
+  trace_path: "./logs/trace.jsonl"
+  audit_enabled: true
+  audit_path: "./logs/audit.log"
+  replay_enabled: true
+
+server:
+  port: 8080
